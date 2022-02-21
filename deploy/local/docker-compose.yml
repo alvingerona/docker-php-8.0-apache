@@ -1,0 +1,55 @@
+version: '3.7'
+
+services:
+  lumenrobot:
+    container_name: lumenrobot
+    restart: unless-stopped
+    tty: true
+    working_dir: /var/www
+    
+    build:
+      context: ../../backend
+      dockerfile: Dockerfile
+
+    ports:
+      - '8100:80'
+
+    volumes:
+      - ../../backend:/var/www
+      - ../config/apache2/apache2.conf:/etc/apache2/apache2.conf
+      - ../config/apache2/sites-enabled:/etc/apache2/sites-enabled
+   #   - ../config/php/local.ini:/usr/local/etc/php/php.ini
+
+    networks:
+      - private
+      - default
+
+  # MySQL DB
+  db:
+    image: mysql:5.7
+    restart: always
+    container_name: lumen_robot_db
+    tty: true
+
+    ports:
+      - '127.0.0.1:4306:3306'
+
+    volumes:
+      - ./mysql/data:/var/lib/mysql
+
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: lumen_robot
+      MYSQL_USER: lumen_robot
+      MYSQL_PASSWORD: lumen_robot
+
+    networks:
+      - default
+      - private
+
+networks:
+  default:
+    external:
+      name: gateway
+  private:
+    internal: true
